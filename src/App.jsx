@@ -1,35 +1,105 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Component } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+import { fetchImagesWithQuery } from "./services/api";
+import { Searchbar } from "./components/Searchbar/Searchbar";
+import { Loader } from "./components/Loader/Loader";
+import { ImageGallery } from "./components/ImageGallery/ImageGallery";
+import { Modal } from "./components/Modal/Modal";
+import { Button } from "./components/Button/Button";
 
-  return (
-    <>
+export class App extends Component {
+  state = {
+    images: [],
+    query: "",
+    page: 1,
+    perPage: 12,
+    isLoading: false,
+    isModalOpen: false,
+    error: null,
+    largeImageURL: "",
+    alt: "",
+  };
+
+  handleSubmit = async (e) => {
+    e.preventDefault();
+    this.setState({ isLoading: true });
+    const search = e.target.elements.searchInput;
+    try {
+      const response = await fetchImagesWithQuery(search.value);
+      this.setState({
+        images: response,
+        query: search.value,
+        page: 1,
+      });
+    } catch (error) {
+      this.setState({ error });
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  };
+
+  openModal = (e) => {
+    this.setState({
+      isModalOpen: true,
+      largeImageURL: e.target.name,
+      alt: e.target.alt,
+    });
+  };
+  closeModal = () => {
+    this.setState({
+      isModalOpen: false,
+    });
+  };
+
+  handleEsc = (e) => {
+    if (e.code === "Escape") {
+      this.closeModal();
+    }
+  };
+
+  handleCloseModal = (e) => {
+    if (e.currentTarget === e.target) {
+      this.closeModal();
+    }
+  };
+
+  handleLoadMore = async () => {
+    const response = await fetchImagesWithQuery(
+      this.state.query,
+      this.state.page + 1
+    );
+    this.setState({
+      images: [...this.state.images, ...response],
+      page: this.state.page + 1,
+    });
+  };
+
+  render() {
+    const { isLoading, images, isModalOpen, alt, largeImageURL, error } =
+      this.state;
+
+    return (
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <div>
+            <Searchbar onSubmit={this.handleSubmit} />
+            <ImageGallery images={images} onClick={this.openModal} />
+            {images.length >= 12 && <Button onClick={this.handleLoadMore} />}
+            {error && <p>...Whoops, something went wrong, try again</p>}
+          </div>
+        )}
+        {isModalOpen ? (
+          <Modal
+            largeImageURL={largeImageURL}
+            alt={alt}
+            closeModal={this.handleCloseModal}
+          />
+        ) : null}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    );
+  }
 }
 
-export default App
+export default App;
