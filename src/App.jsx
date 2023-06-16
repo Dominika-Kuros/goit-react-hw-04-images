@@ -6,6 +6,7 @@ import { Loader } from "./components/Loader/Loader";
 import { ImageGallery } from "./components/ImageGallery/ImageGallery";
 import { Modal } from "./components/Modal/Modal";
 import { Button } from "./components/Button/Button";
+import css from "./App.module.css";
 
 export class App extends Component {
   state = {
@@ -21,9 +22,12 @@ export class App extends Component {
   };
 
   handleSubmit = async (e) => {
+    const search = e.target.elements.searchInput;
+    if (search.value === "") {
+      return;
+    }
     e.preventDefault();
     this.setState({ isLoading: true });
-    const search = e.target.elements.searchInput;
     try {
       const response = await fetchImagesWithQuery(search.value);
       this.setState({
@@ -63,6 +67,13 @@ export class App extends Component {
     }
   };
 
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleEsc);
+  }
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleEsc);
+  }
+
   handleLoadMore = async () => {
     const response = await fetchImagesWithQuery(
       this.state.query,
@@ -79,7 +90,7 @@ export class App extends Component {
       this.state;
 
     return (
-      <div>
+      <div className={css.App}>
         {isLoading ? (
           <Loader />
         ) : (

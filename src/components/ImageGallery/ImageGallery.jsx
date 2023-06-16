@@ -1,8 +1,9 @@
-import propTypes from "prop-types";
+import css from "../ImageGallery/ImageGallery.module.css";
+import PropTypes from "prop-types";
 import { ImageGalleryItem } from "../ImageGalleryItem/ImageGalleryItem";
 
 export const ImageGallery = ({ images, onClick }) => (
-  <ul>
+  <ul className={css.ImageGallery}>
     {images.map((image, index) => (
       <ImageGalleryItem key={index} image={image} onClick={onClick} />
     ))}
@@ -10,6 +11,6 @@ export const ImageGallery = ({ images, onClick }) => (
 );
 
 ImageGallery.propTypes = {
-  images: propTypes.object.isRequired,
-  onClick: propTypes.func.isRequired,
+  images: PropTypes.arrayOf(PropTypes.object),
+  onClick: PropTypes.func.isRequired,
 };
