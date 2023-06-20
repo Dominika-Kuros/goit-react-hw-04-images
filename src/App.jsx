@@ -8,7 +8,7 @@ import { Modal } from "./components/Modal/Modal";
 import { Button } from "./components/Button/Button";
 import css from "./App.module.css";
 
-export class App extends Component {
+class App extends Component {
   state = {
     images: [],
     query: "",
@@ -20,28 +20,37 @@ export class App extends Component {
     largeImageURL: "",
     alt: "",
   };
-
-  handleSubmit = async (e) => {
-    const search = e.target.elements.searchInput;
-    if (search.value === "") {
-      return;
+  componentDidUpdate(_, prevState) {
+    if (
+      prevState.query !== this.state.query ||
+      prevState.page !== this.state.page
+    ) {
+      this.getImages();
     }
-    e.preventDefault();
+  }
+  getImages = async (query, page) => {
     this.setState({ isLoading: true });
     try {
-      const response = await fetchImagesWithQuery(search.value);
-      this.setState({
-        images: response,
-        query: search.value,
-        page: 1,
-      });
+      const data = await fetchImagesWithQuery(query, page);
+      this.setState((state) => ({
+        images: [...state.images, data.hits],
+      }));
     } catch (error) {
-      this.setState({ error });
+      console.log(error);
     } finally {
       this.setState({ isLoading: false });
     }
   };
 
+  handleSubmit = (query) => {
+    this.setState({
+      query: query,
+      images: [],
+      page: 1,
+      isLoading: false,
+      error: null,
+    });
+  };
   openModal = (e) => {
     this.setState({
       isModalOpen: true,
@@ -54,25 +63,6 @@ export class App extends Component {
       isModalOpen: false,
     });
   };
-
-  handleEsc = (e) => {
-    if (e.code === "Escape") {
-      this.closeModal();
-    }
-  };
-
-  handleCloseModal = (e) => {
-    if (e.currentTarget === e.target) {
-      this.closeModal();
-    }
-  };
-
-  componentDidMount() {
-    document.addEventListener("keydown", this.handleEsc);
-  }
-  componentWillUnmount() {
-    document.removeEventListener("keydown", this.handleEsc);
-  }
 
   handleLoadMore = async () => {
     const response = await fetchImagesWithQuery(
@@ -101,16 +91,15 @@ export class App extends Component {
             {error && <p>...Whoops, something went wrong, try again</p>}
           </div>
         )}
-        {isModalOpen ? (
+        {isModalOpen && (
           <Modal
             largeImageURL={largeImageURL}
             alt={alt}
-            closeModal={this.handleCloseModal}
+            closeModal={this.closeModal}
           />
-        ) : null}
+        )}
       </div>
     );
   }
 }
-
 export default App;
