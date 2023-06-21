@@ -28,14 +28,18 @@ class App extends Component {
       this.getImages();
     }
   }
-  getImages = async (query, page) => {
+  getImages = async () => {
     this.setState({ isLoading: true });
     try {
-      const data = await fetchImagesWithQuery(query, page);
-      this.setState({
-        images: [this.state.images, ...data.hits],
+      const data = await fetchImagesWithQuery(
+        this.state.query,
+        this.state.page
+      );
+      this.setState((prevState) => ({
+        images: [...prevState.images, ...data.hits],
         error: "",
-      });
+        page: 1,
+      }));
     } catch (error) {
       console.log(error);
     } finally {
@@ -44,7 +48,7 @@ class App extends Component {
   };
 
   handleSubmit = (query) => {
-    this.setState({ query: query, images: [], page: 1 });
+    this.setState({ query, images: [] });
   };
   openModal = (e) => {
     this.setState({
