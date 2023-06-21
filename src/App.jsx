@@ -32,9 +32,10 @@ class App extends Component {
     this.setState({ isLoading: true });
     try {
       const data = await fetchImagesWithQuery(query, page);
-      this.setState((state) => ({
-        images: [...state.images, data.hits],
-      }));
+      this.setState({
+        images: [this.state.images, ...data.hits],
+        error: "",
+      });
     } catch (error) {
       console.log(error);
     } finally {
@@ -43,13 +44,7 @@ class App extends Component {
   };
 
   handleSubmit = (query) => {
-    this.setState({
-      query: query,
-      images: [],
-      page: 1,
-      isLoading: false,
-      error: null,
-    });
+    this.setState({ query: query, images: [], page: 1 });
   };
   openModal = (e) => {
     this.setState({
@@ -64,15 +59,8 @@ class App extends Component {
     });
   };
 
-  handleLoadMore = async () => {
-    const response = await fetchImagesWithQuery(
-      this.state.query,
-      this.state.page + 1
-    );
-    this.setState({
-      images: [...this.state.images, ...response],
-      page: this.state.page + 1,
-    });
+  handleLoadMore = () => {
+    this.setState((prevState) => ({ page: prevState.page + 1 }));
   };
 
   render() {

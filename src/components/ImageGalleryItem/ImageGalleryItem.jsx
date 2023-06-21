@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import css from "../ImageGalleryItem/ImageGalleryItem.module.css";
 
-export const ImageGalleryItem = ({ image, onClick }) => (
-  <li id={image.id} className={css.ImageGalleryItem}>
+export const ImageGalleryItem = ({ image, onClick }) => {
+  <li key={image.id} className={css.galleryItem}>
     <img
       src={image.webformatURL}
       alt={image.tags}
@@ -10,9 +10,8 @@ export const ImageGalleryItem = ({ image, onClick }) => (
       onClick={onClick}
       className={css.ImageGalleryItemImage}
     />
-  </li>
-);
-
+  </li>;
+};
 ImageGalleryItem.propTypes = {
   image: PropTypes.object,
   onClick: PropTypes.func,

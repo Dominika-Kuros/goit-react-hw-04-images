@@ -4,32 +4,17 @@ import { Component } from "react";
 
 export class Searchbar extends Component {
   state = {
-    search: "",
+    query: "",
+    inputValue: "",
   };
   handleInputChange = (e) => {
-    const value = e.target.value;
-    this.setState({ search: value });
+    this.setState({ inputValue: e.target.value });
   };
-  // onChangeInput = (e) => {
-  //   this.setState({ inputValue: e.target.value });
-  // };
-
-  // onSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (!this.state.search) {
-  //     return "Enter text for search.";
-  //   }
-  //   const searchQuery = e.target.elements.searchName.value.trim();
-  //   this.props.onSubmit(searchQuery);
-  // };
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const searchQuery = this.state.search;
-
+    const searchQuery = e.target.elements.query.value.trim();
     this.props.onSubmit(searchQuery);
-
-    this.setState({ search: "" });
   };
 
   render() {
@@ -43,8 +28,8 @@ export class Searchbar extends Component {
           <input
             className={css.SearchFormInput}
             onChange={this.handleInputChange}
-            value={this.search}
-            name="searchInput"
+            value={this.state.inputValue}
+            name="query"
             type="text"
             autoComplete="off"
             autoFocus
