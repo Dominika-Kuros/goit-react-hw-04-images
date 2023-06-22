@@ -38,7 +38,6 @@ class App extends Component {
       this.setState((prevState) => ({
         images: [...prevState.images, ...data.hits],
         error: "",
-        page: 1,
       }));
     } catch (error) {
       console.log(error);

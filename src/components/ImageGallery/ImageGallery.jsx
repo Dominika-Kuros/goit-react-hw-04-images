@@ -5,7 +5,7 @@ import { ImageGalleryItem } from "../ImageGalleryItem/ImageGalleryItem";
 export const ImageGallery = ({ images, onClick }) => {
   return (
     <ul className={css.ImageGallery}>
-      <ImageGalleryItem images={images} onClick={onClick} />;
+      <ImageGalleryItem images={images} onClick={onClick} />
     </ul>
   );
 };
