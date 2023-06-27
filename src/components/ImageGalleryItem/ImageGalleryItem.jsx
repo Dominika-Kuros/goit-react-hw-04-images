@@ -10,7 +10,9 @@ export const ImageGalleryItem = ({ images, onClick }) => {
             src={image.webformatURL}
             alt={image.tags}
             name={image.largeImageURL}
-            onClick={onClick}
+            onClick={() => {
+              onClick(image.largeImageURL, image.tags);
+            }}
             className={css.ImageGalleryItemImage}
           />
         </li>
@@ -20,6 +22,8 @@ export const ImageGalleryItem = ({ images, onClick }) => {
 };
 ImageGalleryItem.propTypes = {
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onClick: PropTypes.func,
+  onClick: PropTypes.func.isRequired,
 };
   
+
+

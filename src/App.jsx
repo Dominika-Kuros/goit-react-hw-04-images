@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useEffect, useState } from "react";
 
 import { fetchImagesWithQuery } from "./services/api";
 import { Searchbar } from "./components/Searchbar/Searchbar";
@@ -8,89 +8,82 @@ import { Modal } from "./components/Modal/Modal";
 import { Button } from "./components/Button/Button";
 import css from "./App.module.css";
 
-class App extends Component {
-  state = {
-    images: [],
-    query: "",
-    page: 1,
-    perPage: 12,
-    isLoading: false,
-    isModalOpen: false,
-    error: null,
-    largeImageURL: "",
-    alt: "",
-  };
-  componentDidUpdate(_, prevState) {
-    if (
-      prevState.query !== this.state.query ||
-      prevState.page !== this.state.page
-    ) {
-      this.getImages();
+const App = () => {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState(null);
+  const [largeImageURL, setLargeImageURL] = useState("");
+  const [alt, setAlt] = useState("");
+
+  useEffect(() => {
+    if (query !== "") {
+      getImages(query, page);
     }
-  }
-  getImages = async () => {
-    this.setState({ isLoading: true });
+  }, [query, page]);
+
+  const getImages = async (query, page) => {
+    setIsLoading(true);
     try {
-      const data = await fetchImagesWithQuery(
-        this.state.query,
-        this.state.page
-      );
-      this.setState((prevState) => ({
-        images: [...prevState.images, ...data.hits],
-        error: "",
-      }));
+      const data = await fetchImagesWithQuery(query, page);
+      setImages((prevImages) => [...prevImages, ...data.hits]);
     } catch (error) {
-      console.log(error);
+      setError("nie ma zdjęć");
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
 
-  handleSubmit = (query) => {
-    this.setState({ query, images: [] });
-  };
-  openModal = (e) => {
-    this.setState({
-      isModalOpen: true,
-      largeImageURL: e.target.name,
-      alt: e.target.alt,
-    });
-  };
-  closeModal = () => {
-    this.setState({
-      isModalOpen: false,
-    });
+  const handleSubmit = (query) => {
+    setQuery(query);
+    setImages([]);
+    setIsLoading(false);
+    setError(null);
   };
 
-  handleLoadMore = () => {
-    this.setState((prevState) => ({ page: prevState.page + 1 }));
+  const openModal = (largeImageURL, alt) => {
+    setIsModalOpen(true);
+    setLargeImageURL(largeImageURL);
+    setAlt(alt);
   };
 
-  render() {
-    const { isLoading, images, isModalOpen, alt, largeImageURL, error } =
-      this.state;
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setLargeImageURL(largeImageURL);
+    setAlt(alt);
+  };
 
-    return (
-      <div className={css.App}>
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <div>
-            <Searchbar onSubmit={this.handleSubmit} />
-            <ImageGallery images={images} onClick={this.openModal} />
-            {images.length >= 12 && <Button onClick={this.handleLoadMore} />}
-            {error && <p>...Whoops, something went wrong, try again</p>}
-          </div>
-        )}
-        {isModalOpen && (
-          <Modal
-            largeImageURL={largeImageURL}
-            alt={alt}
-            closeModal={this.closeModal}
-          />
-        )}
-      </div>
-    );
-  }
-}
+  const handleLoadMore = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  return (
+    <div className={css.App}>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <div>
+          <Searchbar onSubmit={handleSubmit} />
+          {error && (
+            <h2 style={{ textAlign: "center" }}>
+              Something went wrong: ({error})!
+            </h2>
+          )}
+          <ImageGallery images={images} onClick={openModal} />
+          {images.length >= 12 && <Button onClick={handleLoadMore} />}
+          {error && <p>...Whoops, something went wrong, try again</p>}
+        </div>
+      )}
+      {isModalOpen && (
+        <Modal
+          largeImageURL={largeImageURL}
+          alt={alt}
+          closeModal={closeModal}
+        />
+      )}
+    </div>
+  );
+};
 export default App;
