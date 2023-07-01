@@ -30,7 +30,7 @@ const App = () => {
       const data = await fetchImagesWithQuery(query, page);
       setImages((prevImages) => [...prevImages, ...data.hits]);
     } catch (error) {
-      setError("nie ma zdjęć");
+      setError("no photos");
     } finally {
       setIsLoading(false);
     }
@@ -55,13 +55,13 @@ const App = () => {
     setAlt(alt);
   };
 
-  const handleLoadMore = () => {
-    setPage((prevPage) => prevPage + 1);
+  const handleLoadMore = async () => {
+    setPage((prevState) => prevState + 1);
   };
 
   return (
     <div className={css.App}>
-      {isLoading ? (
+      {isLoading && page === 1 ? (
         <Loader />
       ) : (
         <div>
@@ -71,8 +71,9 @@ const App = () => {
               Something went wrong: ({error})!
             </h2>
           )}
+
           <ImageGallery images={images} onClick={openModal} />
-          {images.length >= 12 && <Button onClick={handleLoadMore} />}
+          {images.length >= 12 ? <Button onClick={handleLoadMore} /> : null}
           {error && <p>...Whoops, something went wrong, try again</p>}
         </div>
       )}
